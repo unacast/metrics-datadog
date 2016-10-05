@@ -1,6 +1,9 @@
 package datadog
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func Test_parseMetricName(t *testing.T) {
 	expectName := "com.example.metricName"
@@ -49,4 +52,43 @@ func Test_parseMetricName_empty_tags(t *testing.T) {
 		t.Fail()
 	}
 
+}
+
+func Test_baseTags(t *testing.T) {
+
+	os.Setenv("ENVIRONMENT", "")
+
+	b := baseTags(Config{})
+
+	if len(b) != 0 {
+		t.Log("Expected length of base tags to be zero")
+		t.Fail()
+	}
+
+	os.Setenv("ENVIRONMENT", "development")
+
+	b2 := baseTags(Config{})
+	if len(b2) != 1 {
+		t.Log("Expected to have exactly one base tag")
+		t.Fail()
+	}
+
+	if b2[0] != "environment:development" {
+		t.Log("Expected tag to be 'environment:development'")
+		t.Fail()
+	}
+
+	b3 := baseTags(Config{
+		AppName: "metrics",
+	})
+
+	if len(b3) != 2 {
+		t.Log("Expected to have exactly two tags")
+		t.Fail()
+	}
+
+	if b3[1] != "app:metrics" {
+		t.Log("Expected tag to be 'app:metrics'")
+		t.Fail()
+	}
 }

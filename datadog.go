@@ -2,7 +2,9 @@
 package datadog
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -12,23 +14,34 @@ import (
 )
 
 func Datadog(r metrics.Registry, d time.Duration, addr string) {
-	c, err := statsd.New(addr)
+	DatadogWithConfig(r, d, Config{
+		Addr: addr,
+	})
+}
+
+func DatadogWithConfig(r metrics.Registry, d time.Duration, config Config) {
+	c, err := statsd.New(config.Addr)
 	if err != nil {
 		log.Println(err)
 	}
 	for {
-		if err := sh(r, c); nil != err {
+		if err := sh(r, c, config); nil != err {
 			log.Println(err)
 		}
 		time.Sleep(d)
 	}
 }
 
-func sh(r metrics.Registry, client *statsd.Client) error {
+type Config struct {
+	Addr    string
+	AppName string
+}
+
+func sh(r metrics.Registry, client *statsd.Client, config Config) error {
 	r.Each(func(metricName string, i interface{}) {
 		dd := parseMetricName(metricName)
 		name := dd.name
-		tags := dd.tags
+		tags := append(dd.tags, baseTags(config)...)
 
 		switch metric := i.(type) {
 		case metrics.Counter:
@@ -77,6 +90,19 @@ func sh(r metrics.Registry, client *statsd.Client) error {
 		}
 	})
 	return nil
+}
+
+func baseTags(config Config) []string {
+	var baseTags []string
+	env := strings.TrimSpace(os.Getenv("ENVIRONMENT"))
+	if env != "" {
+		baseTags = append(baseTags, fmt.Sprintf("environment:%v", env))
+	}
+	if config.AppName != "" {
+		baseTags = append(baseTags, fmt.Sprintf("app:%v", config.AppName))
+	}
+
+	return baseTags
 }
 
 type metric struct {
