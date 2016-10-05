@@ -4,7 +4,6 @@ package datadog
 import (
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -33,8 +32,9 @@ func DatadogWithConfig(r metrics.Registry, d time.Duration, config Config) {
 }
 
 type Config struct {
-	Addr    string
-	AppName string
+	Addr        string
+	AppName     string
+	Environment string
 }
 
 func sh(r metrics.Registry, client *statsd.Client, config Config) error {
@@ -94,9 +94,8 @@ func sh(r metrics.Registry, client *statsd.Client, config Config) error {
 
 func baseTags(config Config) []string {
 	var baseTags []string
-	env := strings.TrimSpace(os.Getenv("ENVIRONMENT"))
-	if env != "" {
-		baseTags = append(baseTags, fmt.Sprintf("environment:%v", env))
+	if config.Environment != "" {
+		baseTags = append(baseTags, fmt.Sprintf("environment:%v", config.Environment))
 	}
 	if config.AppName != "" {
 		baseTags = append(baseTags, fmt.Sprintf("app:%v", config.AppName))
