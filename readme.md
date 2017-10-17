@@ -10,7 +10,7 @@ the same package.
 
 ## Tags
 
-For tags prepend ``[tag:value, tag2:value2]`` to the metric name. 
+For tags append ``[tag:value, tag2:value2]`` to the metric name.
 
 ## LICENSE
 Copyright (c) 2016 Unacast Inc.
