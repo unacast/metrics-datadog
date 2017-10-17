@@ -8,8 +8,9 @@ func Test_parseMetricName(t *testing.T) {
 		"tag1:value1",
 		"tag2:va-lue2",
 		"ta-g",
+		"job:hello/world.sql",
 	}
-	ddMetric := parseMetricName("com.example.metricName[tag1:value1,tag2:va-lue2,ta-g]")
+	ddMetric := parseMetricName("com.example.metricName[tag1:value1,tag2:va-lue2,ta-g,job:hello/world.sql]")
 
 	if ddMetric.name != expectName {
 		t.Logf("Expected metric name %v but got %v", expectName, ddMetric.name)
@@ -17,13 +18,13 @@ func Test_parseMetricName(t *testing.T) {
 	}
 
 	tags := ddMetric.tags
-	if len(tags) != 3 {
+	if len(tags) != len(expectTags) {
 		t.Logf("Expected to have %v tags parsed but found %v", len(expectTags), len(tags))
 		t.Fail()
 	}
 
 	if len(tags) == 3 {
-		for i, _ := range tags {
+		for i := range tags {
 			if tags[i] != expectTags[i] {
 
 				t.Logf("Exepected first metric tag to have be %v but was %v", tags[i], expectTags[i])

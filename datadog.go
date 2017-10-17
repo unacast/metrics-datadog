@@ -110,7 +110,7 @@ type metric struct {
 }
 
 var reName = regexp.MustCompile(`([a-zA-Z0-9]{1,}(\.[a-zA-Z0-9]{1,}){0,})`)
-var reTags = regexp.MustCompile(`\[([a-zA-Z0-9\-\_]+(\:[a-zA-Z0-9\-\_]+){0,},{0,1})+\]`)
+var reTags = regexp.MustCompile(`\[.+\]`)
 
 func parseMetricName(name string) metric {
 	n := reName.FindString(name)
